@@ -18,6 +18,35 @@ Cod_limpio_impuesto_ventas/
 - **Vista** (`impuestos_view.py`) → Interfaz por consola para el usuario.  
 
 ---
+## ▶️ Cómo ejecutar la interfaz gráfica con Kivy
+⚙️ Requisitos
+
+Python: versión recomendada 3.10 – 3.12
+Verifica con:
+
+python --version
+
+
+Kivy: versión 2.3.0 o superior
+Instalación:
+
+pip install "kivy[base]"
+(se recomienda usar un entorno virtual venv para aislar dependencias)
+
+1.Abre una terminal en la carpeta raíz del proyecto (donde está README.md).
+
+2.Activa tu entorno virtual si lo creaste (.venv).
+
+3.Ejecuta el archivo de la GUI
+
+
+
+Para Windows (PowerShell o CMD):
+py view/gui/hello.py
+
+
+Para macOS / Linux (bash/zsh):
+python3 view/gui/hello.py
 
 ## ▶️ Cómo ejecutar la aplicación 
 
