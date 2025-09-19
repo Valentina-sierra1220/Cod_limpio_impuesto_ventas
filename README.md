@@ -77,7 +77,8 @@ python -c "import kivy; print(kivy.__version__)"
 
 Ejecutar desde la raíz del proyecto:
 
-python view/impuestos_view.py
+python view/consola/impuestos_view.py
+
 
 
 Ejemplo de uso:
