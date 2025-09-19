@@ -1,5 +1,9 @@
 # Calculadora de Impuestos de Venta (Clean Code + TDD)
 
+# Integrantes
+- Edwin Sanabria salaxar
+- Valentina Sierra Ospina
+
 
 ## 📂 Estructura del proyecto
 
