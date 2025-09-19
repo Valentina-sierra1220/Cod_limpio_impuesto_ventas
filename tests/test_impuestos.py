@@ -1,5 +1,5 @@
 import unittest
-from impuestos_model import CalculadoraImpuestos
+from src.model.impuestos_model import CalculadoraImpuestos
 
 class TestImpuestos(unittest.TestCase):
     # ---------- Casos NORMALES (4) ----------

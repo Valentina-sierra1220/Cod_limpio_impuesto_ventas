@@ -1,4 +1,4 @@
-from impuestos_controller import parsear_tipos, calcular_total
+from src.controller.impuestos_controller import parsear_tipos, calcular_total
 
 MENU = """
 ================= CALCULADORA DE IMPUESTOS =================

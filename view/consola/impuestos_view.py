@@ -4,7 +4,7 @@ PROJECT_ROOT = os.path.dirname(CURRENT_DIR)   # carpeta raíz del repo
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from impuestos_controller import parsear_tipos, calcular_total
+from src.controller.impuestos_controller import parsear_tipos, calcular_total
 
 MENU = """
 ================= CALCULADORA DE IMPUESTOS =================

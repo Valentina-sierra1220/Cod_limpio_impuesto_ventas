@@ -1,4 +1,4 @@
-from impuestos_model import CalculadoraImpuestos
+from src.model.impuestos_model import CalculadoraImpuestos
 
 def parsear_tipos(cadena: str):
     if "," in cadena:

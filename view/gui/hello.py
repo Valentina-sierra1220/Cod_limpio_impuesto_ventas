@@ -10,7 +10,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 
-from impuestos_controller import parsear_tipos, calcular_total
+from src.controller.impuestos_controller import parsear_tipos, calcular_total
 
 KV = """
 #:import dp kivy.metrics.dp
