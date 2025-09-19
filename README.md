@@ -25,7 +25,7 @@ Cod_limpio_impuesto_ventas/
 2. Ejecutar:
 
 ```bash
-python impuestos_view.py
+python view/impuestos_view.py
 ```
 
 Ejemplo de uso:
