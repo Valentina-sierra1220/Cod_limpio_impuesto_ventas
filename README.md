@@ -96,12 +96,21 @@ Ejecutar desde la raíz del proyecto:
 
 **Windows:**
 
-py view/gui/hello.py
+**Activa tu entorno virtual**
+py -m venv .venv
+
+Actívalo (en PowerShell):
+.\.venv\Scripts\activate
+luego:
+pip install kivy[base] kivy_examples
+y por ultimo:
+
+python view/gui/interfaz.py
 
 
 **macOS / Linux:**
 
-python3 view/gui/hello.py
+python3 view/gui/interfaz.py
 
 
 Se abrirá una ventana gráfica donde podrás:
