@@ -1,16 +1,17 @@
 # --- bootstrap para ejecutar este archivo directamente desde view/gui/ ---
 import os, sys
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  # sube 2 niveles hasta la raíz
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  # sube 2 niveles hasta raíz
+SRC_DIR = os.path.join(PROJECT_ROOT, "src")
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
 # ------------------------------------------------------------------------
 
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 
-from src.controller.impuestos_controller import parsear_tipos, calcular_total
+from controller.impuestos_controller import parsear_tipos, calcular_total
 
 KV = """
 #:import dp kivy.metrics.dp

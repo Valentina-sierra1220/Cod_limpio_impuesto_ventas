@@ -1,10 +1,14 @@
+# --- bootstrap para ejecutar este archivo directamente desde view/consola/ ---
 import os, sys
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(CURRENT_DIR)   # carpeta raíz del repo
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  # sube 2 niveles hasta raíz
+SRC_DIR = os.path.join(PROJECT_ROOT, "src")
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
+# ------------------------------------------------------------------------------
 
 from src.controller.impuestos_controller import parsear_tipos, calcular_total
+
 
 MENU = """
 ================= CALCULADORA DE IMPUESTOS =================
