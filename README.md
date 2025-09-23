@@ -126,7 +126,8 @@ Calcular el total o limpiar el formulario
 
 Ejecutar en la terminal:
 
-python -m unittest test_impuestos.py -v
+py -m unittest tests/test_impuestos.py -v
+
 
 
 Las pruebas cubren:
