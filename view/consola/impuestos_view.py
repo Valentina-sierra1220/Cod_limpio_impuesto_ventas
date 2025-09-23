@@ -1,5 +1,7 @@
 # --- bootstrap para ejecutar este archivo directamente desde view/consola/ ---
-import os, sys
+import os
+import sys
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  # sube 2 niveles hasta raíz
 SRC_DIR = os.path.join(PROJECT_ROOT, "src")
@@ -8,7 +10,6 @@ if SRC_DIR not in sys.path:
 # ------------------------------------------------------------------------------
 
 from src.controller.impuestos_controller import parsear_tipos, calcular_total
-
 
 MENU = """
 ================= CALCULADORA DE IMPUESTOS =================
@@ -25,7 +26,8 @@ Comandos: 'q' para salir
 ============================================================
 """
 
-def run():
+def run() -> None:
+    """Ejecuta el menú interactivo en consola."""
     print(MENU)
     while True:
         precio_str = input("💲 Precio base (o 'q' para salir): ").strip()
@@ -51,9 +53,15 @@ def run():
 
         try:
             total = calcular_total(precio, tipos)
-            print(f"✅ Total calculado:\n   • Precio base: {precio}\n   • Impuesto(s): {tipos}\n   • Total a pagar: {total}\n")
+            print(
+                f"✅ Total calculado:\n"
+                f"   • Precio base: {precio}\n"
+                f"   • Impuesto(s): {tipos}\n"
+                f"   • Total a pagar: {total}\n"
+            )
         except (ValueError, TypeError) as e:
             print(f"❌ Error: {e}\n")
+
 
 if __name__ == "__main__":
     run()

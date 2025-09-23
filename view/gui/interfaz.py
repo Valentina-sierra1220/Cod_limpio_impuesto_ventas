@@ -1,5 +1,7 @@
 # --- bootstrap para ejecutar este archivo directamente desde view/gui/ ---
-import os, sys
+import os
+import sys
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  # sube 2 niveles hasta raíz
 SRC_DIR = os.path.join(PROJECT_ROOT, "src")
@@ -7,11 +9,13 @@ if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 # ------------------------------------------------------------------------
 
+from typing import Dict
+
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 
-from controller.impuestos_controller import parsear_tipos, calcular_total
+from src.controller.impuestos_controller import parsear_tipos, calcular_total
 
 KV = """
 #:import dp kivy.metrics.dp
@@ -115,7 +119,13 @@ IMPUESTOS_VALIDOS = ("exento", "iva19", "iva5", "inc8", "licor25", "bolsa")
 
 
 class VistaCalculadora(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Inicializamos chips como un dict vacío
+        self.chips: Dict[str, object] = {}
+
     def on_kv_post(self, _):
+        """Se llama después de cargar el KV, aquí ya existen los ids."""
         self.chips = {
             "exento": self.ids.chip_exento,
             "iva19": self.ids.chip_iva19,
@@ -187,6 +197,7 @@ class VistaCalculadora(BoxLayout):
 
 class AppCalculadoraImpuestos(App):
     title = "Calculadora de impuestos"
+
     def build(self):
         Builder.load_string(KV)
         return VistaCalculadora()
