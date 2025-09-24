@@ -1,22 +1,25 @@
 # --- bootstrap para ejecutar este archivo directamente desde view/gui/ ---
 import os
 import sys
-
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  # sube 2 niveles hasta raíz
-SRC_DIR = os.path.join(PROJECT_ROOT, "src")
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
-# ------------------------------------------------------------------------
-
 from typing import Dict
 
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 
+# --- bootstrap para rutas ---
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  # sube 2 niveles hasta raíz
+SRC_DIR = os.path.join(PROJECT_ROOT, "src")
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
+# -----------------------------
+
 from src.controller.impuestos_controller import parsear_tipos, calcular_total
 
+# ================================
+# Definición de la interfaz en KV
+# ================================
 KV = """
 #:import dp kivy.metrics.dp
 
@@ -113,6 +116,25 @@ KV = """
         halign: "left"
         valign: "top"
         text_size: self.size
+
+    Label:
+        text: "Historial de cálculos"
+        font_size: dp(16)
+        size_hint_y: None
+        height: dp(30)
+
+    ScrollView:
+        size_hint_y: 0.4
+        do_scroll_x: False
+        do_scroll_y: True
+        Label:
+            id: lbl_historial
+            text: ""
+            halign: "left"
+            valign: "top"
+            text_size: self.width, None
+            size_hint_y: None
+            height: self.texture_size[1]
 """
 
 IMPUESTOS_VALIDOS = ("exento", "iva19", "iva5", "inc8", "licor25", "bolsa")
@@ -121,51 +143,62 @@ IMPUESTOS_VALIDOS = ("exento", "iva19", "iva5", "inc8", "licor25", "bolsa")
 class VistaCalculadora(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Inicializamos chips como un dict vacío
         self.chips: Dict[str, object] = {}
+        self.historial = []  # 👈 Guardamos historial de cálculos
 
     def on_kv_post(self, _):
-        """Se llama después de cargar el KV, aquí ya existen los ids."""
-        self.chips = {
-            "exento": self.ids.chip_exento,
-            "iva19": self.ids.chip_iva19,
-            "iva5": self.ids.chip_iva5,
-            "inc8": self.ids.chip_inc8,
-            "licor25": self.ids.chip_licor25,
-            "bolsa": self.ids.chip_bolsa,
-        }
+        try:
+            self.chips = {
+                "exento": self.ids.chip_exento,
+                "iva19": self.ids.chip_iva19,
+                "iva5": self.ids.chip_iva5,
+                "inc8": self.ids.chip_inc8,
+                "licor25": self.ids.chip_licor25,
+                "bolsa": self.ids.chip_bolsa,
+            }
+        except Exception as e:
+            self.ids.lbl_resultado.text = f"❌ Error iniciando chips: {e}"
 
     def alternar_chip(self, nombre: str, estado: str) -> None:
-        if estado == "down":
-            if nombre == "exento":
-                for k, c in self.chips.items():
-                    c.state = "down" if k == "exento" else "normal"
+        try:
+            impuestos_actuales = [p.strip() for p in self.ids.inp_impuestos.text.split(",") if p.strip()]
+            if estado == "down":
+                if nombre not in impuestos_actuales:
+                    impuestos_actuales.append(nombre)
+                if nombre == "exento":
+                    impuestos_actuales = ["exento"]
+                    for k, c in self.chips.items():
+                        c.state = "down" if k == "exento" else "normal"
             else:
-                self.chips["exento"].state = "normal"
+                if nombre in impuestos_actuales:
+                    impuestos_actuales.remove(nombre)
 
-        activos = [k for k, c in self.chips.items() if c.state == "down"]
-        if "exento" in activos and len(activos) > 1:
-            for c in self.chips.values():
-                c.state = "normal"
-            self.chips["exento"].state = "down"
-            activos = ["exento"]
-
-        self.ids.inp_impuestos.text = ", ".join(activos)
+            self.ids.inp_impuestos.text = ", ".join(impuestos_actuales)
+        except Exception as e:
+            self.ids.lbl_resultado.text = f"❌ Error en alternar_chip: {e}"
 
     def sincronizar_desde_texto(self, texto: str) -> None:
-        lista = [p.strip().lower() for p in texto.replace(";", ",").replace("|", ",").split(",") if p.strip()]
-        lista = [p for p in lista if p in IMPUESTOS_VALIDOS]
-        if "exento" in lista:
-            lista = ["exento"]
-        for k, c in self.chips.items():
-            c.state = "down" if k in lista else "normal"
+        try:
+            lista = [p.strip().lower() for p in texto.replace(";", ",").replace("|", ",").split(",") if p.strip()]
+            lista = [p for p in lista if p in IMPUESTOS_VALIDOS]
+            if "exento" in lista:
+                lista = ["exento"]
+            for k, c in self.chips.items():
+                c.state = "down" if k in lista else "normal"
+        except Exception as e:
+            self.ids.lbl_resultado.text = f"❌ Error en sincronizar: {e}"
 
     def limpiar_formulario(self, campo_precio, campo_impuestos) -> None:
-        campo_precio.text = ""
-        campo_impuestos.text = ""
-        for c in self.chips.values():
-            c.state = "normal"
-        self.ids.lbl_resultado.text = "Formulario limpio."
+        try:
+            campo_precio.text = ""
+            campo_impuestos.text = ""
+            for c in self.chips.values():
+                c.state = "normal"
+            self.ids.lbl_resultado.text = "Formulario limpio."
+            self.ids.lbl_historial.text = ""  # 👈 Limpia historial también
+            self.historial = []
+        except Exception as e:
+            self.ids.lbl_resultado.text = f"❌ Error al limpiar: {e}"
 
     def calcular(self, precio_txt: str, impuestos_txt: str) -> None:
         precio_txt = (precio_txt or "").strip()
@@ -185,14 +218,16 @@ class VistaCalculadora(BoxLayout):
         try:
             tipos = parsear_tipos(impuestos_txt)
             total = calcular_total(precio, tipos)
-            self.ids.lbl_resultado.text = (
-                "✅ Total calculado:\n"
-                f"• Precio base: {precio}\n"
-                f"• Impuesto(s): {tipos}\n"
-                f"• Total a pagar: {total}"
-            )
+            resultado = f"• Precio base: {precio} | Impuestos: {tipos} | Total: {total}"
+            self.ids.lbl_resultado.text = "✅ Último cálculo:\n" + resultado
+
+            # 👇 Agregar al historial
+            self.historial.insert(0, resultado)  # Insertar al inicio (más reciente arriba)
+            self.ids.lbl_historial.text = "\n".join(self.historial[:10])  # Mostramos máx 10
         except (ValueError, TypeError) as e:
             self.ids.lbl_resultado.text = f"❌ Error: {e}"
+        except Exception as e:
+            self.ids.lbl_resultado.text = f"❌ Error inesperado: {e}"
 
 
 class AppCalculadoraImpuestos(App):
