@@ -1,8 +1,22 @@
-# --- bootstrap para ejecutar este archivo directamente desde view/gui/ ---
+"""
+interfaz.py
+------------
+Interfaz gráfica de la Calculadora de Impuestos con Kivy.
+"""
+
+# ================================
+# Importaciones estándar
+# ================================
 import os
 import sys
 from typing import Dict
 
+
+
+
+# ================================
+# Importaciones de Kivy
+# ================================
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
@@ -10,18 +24,22 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 
-# --- bootstrap para rutas ---
+# ================================
+# Configuración de rutas
+# ================================
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  # sube 2 niveles hasta raíz
 SRC_DIR = os.path.join(PROJECT_ROOT, "src")
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
-# -----------------------------
 
+# ================================
+# Importaciones del proyecto
+# ================================
 from src.controller.impuestos_controller import parsear_tipos, calcular_total
 
 # ================================
-# Definición de la interfaz en KV
+# Definición de la interfaz KV
 # ================================
 KV = """
 #:import dp kivy.metrics.dp
@@ -140,18 +158,34 @@ KV = """
             height: self.texture_size[1]
 """
 
+# ================================
+# Constantes
+# ================================
 IMPUESTOS_VALIDOS = ("exento", "iva19", "iva5", "inc8", "licor25", "bolsa")
 
 
 # ================================
 # Funciones auxiliares
 # ================================
-def mostrar_popup(mensaje: str, titulo: str = "⚠ Error"):
+def mostrar_popup(mensaje: str, titulo: str = "⚠ Error") -> None:
     """
-    Muestra una ventana emergente con el mensaje de error.
+    Muestra una ventana emergente con un mensaje de error o advertencia.
     """
-    from kivy.uix.boxlayout import BoxLayout
+    box = BoxLayout(orientation="vertical", spacing=10, padding=10)
+    lbl = Label(text=mensaje)
+    btn: Button = Button(text="Cerrar", size_hint_y=None, height=40)
 
+    box.add_widget(lbl)
+    box.add_widget(btn)
+
+    popup = Popup(
+        title=titulo,
+        content=box,
+        size_hint=(0.6, 0.4),
+        auto_dismiss=False,
+    )
+
+    #Cierra el popup al pulsar el botón 
     box = BoxLayout(orientation="vertical", spacing=10, padding=10)
     lbl = Label(text=mensaje)
     btn = Button(text="Cerrar", size_hint_y=None, height=40)
@@ -165,12 +199,16 @@ def mostrar_popup(mensaje: str, titulo: str = "⚠ Error"):
         size_hint=(0.6, 0.4),
         auto_dismiss=False,
     )
-    btn.bind(on_release=popup.dismiss)
+
+# 👉 usamos getattr para que Pylance no subraye
+    getattr(btn, "bind")(on_release=lambda *_: popup.dismiss())
+
     popup.open()
 
 
+
 # ================================
-# Clase principal de la vista
+# Vista principal
 # ================================
 class VistaCalculadora(BoxLayout):
     """
@@ -180,12 +218,13 @@ class VistaCalculadora(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.chips: Dict[str, object] = {}
-        self.historial = []
+        self.historial: list[str] = []
 
-    def on_kv_post(self, _):
-        """
-        Inicializa los chips después de cargar la interfaz.
-        """
+    # ----------------------------
+    # Inicialización
+    # ----------------------------
+    def on_kv_post(self, _) -> None:
+        """Inicializa los chips después de cargar la interfaz."""
         self.chips = {
             "exento": self.ids.chip_exento,
             "iva19": self.ids.chip_iva19,
@@ -199,12 +238,11 @@ class VistaCalculadora(BoxLayout):
     # Manejo de chips
     # ----------------------------
     def alternar_chip(self, nombre: str, estado: str) -> None:
-        """
-        Sincroniza los chips con el campo de impuestos.
-        """
+        """Sincroniza los chips con el campo de impuestos."""
         impuestos_actuales = [
             p.strip() for p in self.ids.inp_impuestos.text.split(",") if p.strip()
         ]
+
         if estado == "down":
             if nombre not in impuestos_actuales:
                 impuestos_actuales.append(nombre)
@@ -219,9 +257,7 @@ class VistaCalculadora(BoxLayout):
         self.ids.inp_impuestos.text = ", ".join(impuestos_actuales)
 
     def sincronizar_desde_texto(self, texto: str) -> None:
-        """
-        Sincroniza el texto del input con el estado de los chips.
-        """
+        """Sincroniza el texto ingresado con el estado de los chips."""
         lista = [
             p.strip().lower()
             for p in texto.replace(";", ",").replace("|", ",").split(",")
@@ -236,12 +272,10 @@ class VistaCalculadora(BoxLayout):
             c.state = "down" if k in lista else "normal"
 
     # ----------------------------
-    # Lógica de formulario
+    # Lógica del formulario
     # ----------------------------
     def limpiar_formulario(self, campo_precio, campo_impuestos) -> None:
-        """
-        Limpia los campos del formulario y el historial.
-        """
+        """Limpia los campos del formulario y reinicia el historial."""
         campo_precio.text = ""
         campo_impuestos.text = ""
         for c in self.chips.values():
@@ -252,10 +286,8 @@ class VistaCalculadora(BoxLayout):
         self.historial = []
 
     def calcular(self, precio_txt: str, impuestos_txt: str) -> None:
-        """
-        Realiza el cálculo de impuestos y actualiza el historial.
-        """
-        # Validar precio
+        """Realiza el cálculo de impuestos y actualiza el historial."""
+        # Validación del precio
         precio_txt = (precio_txt or "").strip()
         if not precio_txt:
             mostrar_popup("Debes ingresar un precio base.")
@@ -270,7 +302,7 @@ class VistaCalculadora(BoxLayout):
             mostrar_popup("El precio debe ser numérico.")
             return
 
-        # Procesar impuestos
+        # Procesar impuestos y calcular
         impuestos_txt = (impuestos_txt or self.ids.inp_impuestos.text or "").strip()
         try:
             tipos = parsear_tipos(impuestos_txt)
@@ -285,14 +317,22 @@ class VistaCalculadora(BoxLayout):
 
         except (ValueError, TypeError) as e:
             mostrar_popup(str(e))
-        except Exception as e:
-            mostrar_popup(f"Error inesperado: {e}")
+
+        except (ArithmeticError, RuntimeError) as e:
+            mostrar_popup(f"Error de cálculo: {e}")
+
+        except Exception as e:  # noqa: BLE001  # pylint: disable=broad-except
+            from traceback import format_exc
+            print(format_exc())
+            mostrar_popup("Ocurrió un error inesperado. Revisa la consola para más detalles.")
 
 
 # ================================
 # Aplicación principal
 # ================================
 class AppCalculadoraImpuestos(App):
+    """Aplicación principal de la calculadora."""
+
     title = "Calculadora de impuestos"
 
     def build(self):
